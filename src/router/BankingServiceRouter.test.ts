@@ -4,10 +4,10 @@ test('has routes', () => {
   const routes = [
     { path: '/accounts', method: 'post' },
     { path: '/accounts/:owner/deposit', method: 'post' },
-    // { path: '/:accountNumber/withdraw', method: 'post' },
-    // { path: '/:accountNumber/transactions', method: 'get' },
-    // { path: '/:accountNumber/balance', method: 'get' },
-    // { path: '/high-value', method: 'get' },
+    // { path: '/accounts/:owner/withdraw', method: 'post' },
+    // { path: '/accounts/:owner/transactions', method: 'get' },
+    // { path: '/accounts/:owner/balance', method: 'get' },
+    // { path: '/accounts/high-value', method: 'get' },
   ]
 
   routes.forEach((route) => {
