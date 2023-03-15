@@ -1,0 +1,94 @@
+import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
+import { IAccount } from '../model/Bank';
+import { IBankRepository } from '../repository/IBankRepository'
+import { AccountModel } from './Account.model';
+import { AccountDocument } from './AccountDocument';
+
+export class MongoDBRepository implements IBankRepository {
+  private readonly mongoUrl = 'mongodb://localhost:27017';
+  private readonly dbName = 'bank';
+  private readonly accountCollectionName = 'accounts';
+
+  private client!: MongoClient;
+  private db!: Db;
+  private accountCollection!: Collection<AccountDocument>;
+
+  async connect(): Promise<void> {
+    this.client = await MongoClient.connect(this.mongoUrl);
+    this.db = this.client.db(this.dbName);
+    this.accountCollection = this.db.collection(this.accountCollectionName);
+  }
+
+  async createAccount(owner: string): Promise<IAccount> {
+    const newAccount = new AccountModel({ owner, balance: 0, transactions: [] });
+    const savedAccount = await newAccount.save();
+    return savedAccount.toObject() as IAccount;
+  // const result = await this.accountCollection.insertOne(newAccount);
+    // return result.toObject() as oString();
+  }
+
+  async deposit(ownerId: string, amount: number): Promise<void> {
+    const account = await this.getAccountById(ownerId);
+    if (!account) {
+      throw new Error(`Account not found for ${ownerId}.`);
+    }
+    account.balance += amount;
+    const transaction: Transaction = {
+      description: `Deposit`,
+      date: new Date(),
+      amount
+    };
+    account.transactions.push(transaction);
+    await this.accountCollection.updateOne({ _id: new ObjectId(ownerId) }, { $set: account });
+  }
+
+  async withdraw(ownerId: string, amount: number): Promise<void> {
+    const account = await this.getAccountById(ownerId);
+    if (!account) {
+      throw new Error(`Account not found for ${ownerId}.`);
+    }
+    if (amount > account.balance) {
+      throw new Error(`Insufficient balance for ${ownerId}.`);
+    }
+    account.balance -= amount;
+    const transaction: Transaction = {
+      description: `Withdrawal`,
+      date: new Date(),
+      amount: -amount
+    };
+    account.transactions.push(transaction);
+    await this.accountCollection.updateOne({ _id: new ObjectId(ownerId) }, { $set: account });
+  }
+
+  async getBalance(ownerId: string): Promise<number> {
+    const account = await this.getAccountById(ownerId);
+    if (!account) {
+      throw new Error(`Account not found for ${ownerId}.`);
+    }
+    return account.balance;
+  }
+
+  async listTransactions(ownerId: string): Promise<Transaction[]> {
+    const account = await this.getAccountById(ownerId);
+    if (!account) {
+      throw new Error(`Account not found for ${ownerId}.`);
+    }
+    const transactions = account.transactions
+      .slice(-5)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    return transactions;
+  }
+
+  async listHighValueCustomers(): Promise<string[]> {
+    const highValueAccounts = await this.accountCollection.find({ balance: { $gt: 5000 } })
+      .sort({ balance: -1 })
+      .toArray();
+    const highValueCustomers = highValueAccounts.map(account => account.owner);
+    return highValueCustomers;
+  }
+  private async getAccountById(ownerId: string): Promise<IAccount | null> {
+    const account = await AccountModel.findById(ownerId);
+    return account ? account.toObject() as IAccount : null;
+  }
+
+}

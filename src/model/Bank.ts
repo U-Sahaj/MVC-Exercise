@@ -1,24 +1,24 @@
-interface Transaction {
+export interface ITransaction {
     description: string
     date: Date;
     amount: number;
 }
   
-interface Account {
+export interface IAccount {
   owner: string;
   balance: number;
-  transactions: Transaction[]
+  transactions: ITransaction[]
 }
   
 export class Bank {
-  private accounts: Account[]
+  private accounts: IAccount[]
 
   constructor() {
     this.accounts = []
   }
 
   createAccount(owner: string): void {
-    const account: Account = {
+    const account: IAccount = {
       owner,
       balance: 0,
       transactions: []
@@ -27,7 +27,7 @@ export class Bank {
     console.log(`Account created for ${owner}.`)
   }
 
-  getAccount(owner: string): Account | undefined {
+  getAccount(owner: string): IAccount | undefined {
     return this.accounts.find(account => account.owner === owner)
   }
 
@@ -38,7 +38,7 @@ export class Bank {
       return;
     }
     account.balance += amount;
-    const transaction: Transaction = {
+    const transaction: ITransaction = {
       description: `Deposit`,
       date: new Date(),
       amount
@@ -58,7 +58,7 @@ export class Bank {
       return
     }
     account.balance -= amount;
-    const transaction: Transaction = {
+    const transaction: ITransaction = {
       description: `Withdrawal`,
       date: new Date(),
       amount: -amount
@@ -67,7 +67,7 @@ export class Bank {
     console.log(`${amount} withdrawn from ${owner}'s account.`)
   }
 
-  listTransactions(owner: string): Transaction[] {
+  listTransactions(owner: string): ITransaction[] {
     const account = this.getAccount(owner);
     if (!account) {
       console.log(`Account not found for ${owner}.`);
@@ -95,7 +95,7 @@ export class Bank {
     return account.balance
   }
 
-  listHighValueCustomers(): Account[] {
+  listHighValueCustomers(): IAccount[] {
     const highValueCustomers = this.accounts
     .filter((account) => account.balance > 5000)
     .sort((a, b) => b.balance - a.balance)

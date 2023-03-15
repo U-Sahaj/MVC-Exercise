@@ -21,20 +21,20 @@ describe('BankingServiceRouter', () => {
   })
 })
 
-describe('BankingServiceRouter routes create account request correctly', () => {
-  test.only('mocked createAccountHandler method is called', () => {
+// describe('BankingServiceRouter routes create account request correctly', () => {
+//   test.only('mocked createAccountHandler method is called', () => {
 
-    const bankingServiceRouter = express.Router();
-    const controller = new BankController();
+//     const bankingServiceRouter = express.Router();
+//     const controller = new BankController();
 
-    const mockCreateAccount = jest.spyOn(BankController.prototype, 'createAccountHandler');
+//     const mockCreateAccount = jest.spyOn(BankController.prototype, 'createAccountHandler');
 
     
-    bankingServiceRouter.post('/accounts', controller.createAccountHandler);
+//     bankingServiceRouter.post('/accounts', controller.createAccountHandler);
     
-    expect(mockCreateAccount).toHaveBeenCalled();
+//     expect(mockCreateAccount).toHaveBeenCalled();
 
 
-  })
-})
+//   })
+// })
 

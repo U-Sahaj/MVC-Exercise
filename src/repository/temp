@@ -1,0 +1,64 @@
+export class MongoDBRepository extends BankRepository {
+  // ...
+
+  public async createAccount(owner: string): Promise<Account> {
+    const newAccount = new AccountModel({ owner, balance: 0, transactions: [] });
+    const savedAccount = await newAccount.save();
+    return savedAccount.toObject() as Account;
+  }
+
+  public async getAccountById(ownerId: string): Promise<Account | null> {
+    const account = await AccountModel.findById(ownerId);
+    return account ? account.toObject() as Account : null;
+  }
+
+  public async deposit(ownerId: string, amount: number, description: string): Promise<Transaction> {
+    const account = await AccountModel.findByIdAndUpdate(
+      ownerId,
+      { $inc: { balance: amount }, $push: { transactions: { description, amount, date: new Date() } } },
+      { new: true }
+    );
+    if (!account) {
+      throw new Error(`Account with ID ${ownerId} not found`);
+    }
+    return account.transactions[account.transactions.length - 1];
+  }
+
+  public async withdraw(ownerId: string, amount: number, description: string): Promise<Transaction> {
+    const account = await AccountModel.findById(ownerId);
+    if (!account) {
+      throw new Error(`Account with ID ${ownerId} not found`);
+    }
+    if (account.balance < amount) {
+      throw new Error('Insufficient balance');
+    }
+    account.balance -= amount;
+    account.transactions.push({ description, amount: -amount, date: new Date() });
+    await account.save();
+    return account.transactions[account.transactions.length - 1];
+  }
+
+  public async getBalance(ownerId: string): Promise<number> {
+    const account = await AccountModel.findById(ownerId);
+    if (!account) {
+      throw new Error(`Account with ID ${ownerId} not found`);
+    }
+    return account.balance;
+  }
+
+  public async getLastTransactions(ownerId: string): Promise<Transaction[]> {
+    const account = await AccountModel.findById(ownerId);
+    if (!account) {
+      throw new Error(`Account with ID ${ownerId} not found`);
+    }
+    const lastTransactions = account.transactions.slice(-5);
+    return lastTransactions.map((transaction) => {
+      return { description: transaction.description, date: transaction.date, amount: transaction.amount };
+    });
+  }
+
+  public async getHighValueCustomers(): Promise<Account[]> {
+    const highValueAccounts = await AccountModel.find({ balance: { $gt: 5000 } }).sort({ balance: -1 });
+    return highValueAccounts.map((account) => account.toObject() as Account);
+  }
+}
