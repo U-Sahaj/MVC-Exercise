@@ -1,3 +1,5 @@
+import express from "express";
+import { BankController } from "../controller/bank.controller";
 import bankingServiceRouter from "./BankingServiceRouter";
 
 describe('BankingServiceRouter', () => {
@@ -18,3 +20,21 @@ describe('BankingServiceRouter', () => {
     });
   })
 })
+
+describe('BankingServiceRouter routes create account request correctly', () => {
+  test.only('mocked createAccountHandler method is called', () => {
+
+    const bankingServiceRouter = express.Router();
+    const controller = new BankController();
+
+    const mockCreateAccount = jest.spyOn(BankController.prototype, 'createAccountHandler');
+
+    
+    bankingServiceRouter.post('/accounts', controller.createAccountHandler);
+    
+    expect(mockCreateAccount).toHaveBeenCalled();
+
+
+  })
+})
+
