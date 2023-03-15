@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { Bank } from '../model';
 import {BankController} from '../controller/bank.controller'
 
 const bankingServiceRouter = express.Router();

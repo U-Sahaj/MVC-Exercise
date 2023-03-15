@@ -1,6 +1,6 @@
 import { expect, describe, it, jest } from '@jest/globals'
 import { Response, Request } from 'express'
-import { Bank } from '../model';
+import { Bank } from '../model/Bank'
 import { BankController } from './bank.controller'
 
 describe('Banking API', () => {

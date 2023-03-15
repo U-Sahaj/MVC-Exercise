@@ -1,5 +1,5 @@
 import { Response, Request } from 'express'
-import { Bank } from '../model';
+import { Bank } from '../model/Bank';
 
 const bank = new Bank()
 
